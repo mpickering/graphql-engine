@@ -18,6 +18,30 @@ import qualified Data.Vector       as V
 import           Control.Monad
 import           Hasura.Prelude
 
+data CRSNameProps
+  = CRSNameProps
+  { _cnpName :: !Text
+  } deriving (Show, Eq)
+
+data CRSLinkProps
+  = CRSLinkProps
+  { _clpHref :: !Text
+  , _clpType :: !(Maybe Text)
+  } deriving (Show, Eq)
+
+data CRS
+  = CRSName !CRSNameProps
+  | CRSLink !CRSLinkProps
+  deriving (Show, Eq)
+
+$(J.deriveJSON (J.aesonDrop 4 J.camelCase) ''CRSNameProps)
+$(J.deriveJSON (J.aesonDrop 4 J.camelCase) ''CRSLinkProps)
+$(J.deriveJSON
+  J.defaultOptions { J.constructorTagModifier = J.camelCase . drop 3
+                   , J.sumEncoding = J.TaggedObject "type" "properties"
+                   }
+  ''CRS)
+
 data Position
   = Position !Double !Double !(Maybe Double)
   deriving (Show, Eq)
@@ -165,26 +189,3 @@ instance J.FromJSON GeometryWithCRS where
     crsM <- o J..:? "crs"
     return $ GeometryWithCRS geom crsM
 
-data CRSNameProps
-  = CRSNameProps
-  { _cnpName :: !Text
-  } deriving (Show, Eq)
-
-data CRSLinkProps
-  = CRSLinkProps
-  { _clpHref :: !Text
-  , _clpType :: !(Maybe Text)
-  } deriving (Show, Eq)
-
-data CRS
-  = CRSName !CRSNameProps
-  | CRSLink !CRSLinkProps
-  deriving (Show, Eq)
-
-$(J.deriveJSON (J.aesonDrop 4 J.camelCase) ''CRSNameProps)
-$(J.deriveJSON (J.aesonDrop 4 J.camelCase) ''CRSLinkProps)
-$(J.deriveJSON
-  J.defaultOptions { J.constructorTagModifier = J.camelCase . drop 3
-                   , J.sumEncoding = J.TaggedObject "type" "properties"
-                   }
-  ''CRS)

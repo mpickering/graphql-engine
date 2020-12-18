@@ -36,6 +36,7 @@ import           Control.Concurrent.Extended          (forkImmortal)
 import           Control.Monad.Trans.Control          (MonadBaseControl)
 import           Data.IORef                           (newIORef)
 import           Data.Time.Clock                      (UTCTime)
+import Control.Monad.IO.Unlift
 
 import qualified Hasura.Tracing                       as Tracing
 
@@ -104,6 +105,7 @@ setupAuthMode
   :: ( HasVersion
      , MonadIO m
      , MonadBaseControl IO m
+     , MonadUnliftIO m
      , LA.Forall (LA.Pure m)
      , Tracing.HasReporter m
      )
@@ -150,6 +152,7 @@ setupAuthMode mAdminSecretHash mWebHook mJwtSecret mUnAuthRole httpManager logge
       :: ( HasVersion
          , MonadIO m
          , MonadBaseControl IO m
+         , MonadUnliftIO m
          , LA.Forall (LA.Pure m)
          , Tracing.HasReporter m
          )

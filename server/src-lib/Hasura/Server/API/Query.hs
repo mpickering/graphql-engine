@@ -138,43 +138,48 @@ data RQLQueryV2
   | RQV2TrackFunction !TrackFunctionV2
   deriving (Show, Eq)
 
+
+
 data RQLQuery
   = RQV1 !RQLQueryV1
   | RQV2 !RQLQueryV2
   deriving (Show, Eq)
 
-instance FromJSON RQLQuery where
-  parseJSON = withObject "Object" $ \o -> do
-    mVersion <- o .:? "version"
-    let version = fromMaybe VIVersion1 mVersion
-        val = Object o
-    case version of
-      VIVersion1 -> RQV1 <$> parseJSON val
-      VIVersion2 -> RQV2 <$> parseJSON val
+$(do
 
-instance ToJSON RQLQuery where
-  toJSON = \case
-    RQV1 q -> embedVersion VIVersion1 $ toJSON q
-    RQV2 q -> embedVersion VIVersion2 $ toJSON q
-    where
-      embedVersion version (Object o) =
-        Object $ HM.insert "version" (toJSON version) o
-      -- never happens since JSON value of RQL queries are always objects
-      embedVersion _ _ = error "Unexpected: toJSON of RQL queries are not objects"
-
-$(deriveJSON
-  defaultOptions { constructorTagModifier = snakeCase . drop 2
-                 , sumEncoding = TaggedObject "type" "args"
-                 }
-  ''RQLQueryV1)
-
-$(deriveJSON
-  defaultOptions { constructorTagModifier = snakeCase . drop 4
+  i1 <- deriveJSON defaultOptions { constructorTagModifier = snakeCase . drop 2
+                          , sumEncoding = TaggedObject "type" "args"
+                 } ''RQLQueryV1
+  i2 <- deriveJSON
+    defaultOptions { constructorTagModifier = snakeCase . drop 4
                  , sumEncoding = TaggedObject "type" "args"
                  , tagSingleConstructors = True
                  }
-  ''RQLQueryV2
- )
+    ''RQLQueryV2
+
+  i3 <- [d| instance FromJSON RQLQuery where
+              parseJSON = withObject "Object" $ \o -> do
+                mVersion <- o .:? "version"
+                let version = fromMaybe VIVersion1 mVersion
+                    val = Object o
+                case version of
+                  VIVersion1 -> RQV1 <$> parseJSON val
+                  VIVersion2 -> RQV2 <$> parseJSON val |]
+
+  i4 <- [d| instance ToJSON RQLQuery where
+              toJSON = \case
+                RQV1 q -> embedVersion VIVersion1 $ toJSON q
+                RQV2 q -> embedVersion VIVersion2 $ toJSON q
+                where
+                  embedVersion version (Object o) =
+                    Object $ HM.insert "version" (toJSON version) o
+                  -- never happens since JSON value of RQL queries are always objects
+                  embedVersion _ _ = error "Unexpected: toJSON of RQL queries are not objects" |]
+  return (i1 ++ i2 ++ i3 ++ i4) )
+
+
+
+
 
 -- | Using @pg_notify@ function to publish schema sync events to other server
 -- instances via 'hasura_schema_update' channel.

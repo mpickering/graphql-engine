@@ -396,7 +396,7 @@ type LiveQueryPostPollHook = PollDetails -> IO ()
 
 -- the default LiveQueryPostPollHook
 defaultLiveQueryPostPollHook :: L.Logger L.Hasura -> LiveQueryPostPollHook
-defaultLiveQueryPostPollHook = L.unLogger
+defaultLiveQueryPostPollHook x = L.unLogger x
 
 -- | Where the magic happens: the top-level action run periodically by each
 -- active 'Poller'. This needs to be async exception safe.

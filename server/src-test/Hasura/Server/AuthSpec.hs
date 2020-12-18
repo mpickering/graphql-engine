@@ -21,6 +21,7 @@ import           Hasura.Server.Utils
 import           Hasura.Session
 import qualified Hasura.Tracing              as Tracing
 import           Test.Hspec
+import Control.Monad.IO.Unlift
 
 spec :: Spec
 spec = do
@@ -571,7 +572,7 @@ mkJSONPathE = either error id . parseJSONPath
 
 
 newtype NoReporter a = NoReporter { runNoReporter :: IO a }
-  deriving newtype (Functor, Applicative, Monad, MonadIO, MonadBase IO, MonadBaseControl IO)
+  deriving newtype (Functor, Applicative, Monad, MonadIO, MonadBase IO, MonadBaseControl IO, MonadUnliftIO)
 
 instance Tracing.HasReporter NoReporter
 

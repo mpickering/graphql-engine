@@ -65,13 +65,13 @@ instance NFData CronSchedule
 instance (TH.Lift k, TH.Lift v) => TH.Lift (M.HashMap k v) where
   lift m = [| M.fromList $(TH.lift $ M.toList m) |]
 #if MIN_VERSION_template_haskell(2,16,0)
-  liftTyped = TH.unsafeTExpCoerce . TH.lift
+  liftTyped = TH.unsafeCodeCoerce . TH.lift
 #endif
 
 instance TH.Lift a => TH.Lift (S.HashSet a) where
   lift s = [| S.fromList $(TH.lift $ S.toList s) |]
 #if MIN_VERSION_template_haskell(2,16,0)
-  liftTyped = TH.unsafeTExpCoerce . TH.lift
+  liftTyped = TH.unsafeCodeCoerce . TH.lift
 #endif
 
 deriving instance TH.Lift TDFA.CompOption

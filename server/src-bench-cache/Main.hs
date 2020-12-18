@@ -218,7 +218,7 @@ populate n _initialise _insertAllStripes = do
 
 randomInts :: Int -> IO (V.Vector Int)
 randomInts n =
-  withSystemRandom . asGenST $ \gen -> uniformVector gen n
+  withSystemRandomST $ \gen -> uniformVector gen n
 
 
 -- | Return a zipf-mandelbrot distributed list of 'n' Ints (the Ints themselves

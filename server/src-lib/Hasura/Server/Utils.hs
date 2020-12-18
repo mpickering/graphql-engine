@@ -8,7 +8,7 @@ import           Data.Aeson.Internal
 import           Data.Char
 import           Data.Text.Extended
 import           Hasura.Server.Types
-import           Language.Haskell.TH.Syntax (Q, TExp)
+import           Language.Haskell.TH.Syntax (Q, TExp, liftCode, examineCode, Code)
 import           System.Environment
 import           System.Exit
 import           System.Process
@@ -88,11 +88,11 @@ getRequestId headers =
     Just reqId -> return $ RequestId $ bsToTxt reqId
 
 -- Get an env var during compile time
-getValFromEnvOrScript :: String -> String -> Q (TExp String)
-getValFromEnvOrScript n s = do
+getValFromEnvOrScript :: String -> String -> Code Q String
+getValFromEnvOrScript n s = liftCode $ do
   maybeVal <- TH.runIO $ lookupEnv n
   case maybeVal of
-    Just val -> [|| val ||]
+    Just val -> examineCode [|| val ||]
     Nothing  -> runScript s
 
 -- Run a shell script during compile time
@@ -105,7 +105,7 @@ runScript fp = do
   when (exitCode /= ExitSuccess) $ fail $
     "Running shell script " ++ fp ++ " failed with exit code : "
     ++ show exitCode ++ " and with error : " ++ stdErr
-  [|| stdOut ||]
+  examineCode [|| stdOut ||]
 
 -- find duplicates
 duplicates :: Ord a => [a] -> [a]
@@ -114,10 +114,10 @@ duplicates = mapMaybe greaterThanOne . group . sort
     greaterThanOne l = bool Nothing (Just $ head l) $ length l > 1
 
 -- | Quotes a regex using Template Haskell so syntax errors can be reported at compile-time.
-quoteRegex :: TDFA.CompOption -> TDFA.ExecOption -> String -> Q (TExp TDFA.Regex)
-quoteRegex compOption execOption regexText = do
+quoteRegex :: TDFA.CompOption -> TDFA.ExecOption -> String -> Code Q TDFA.Regex
+quoteRegex compOption execOption regexText = liftCode $ do
   regex <- TDFA.parseRegex regexText `onLeft` (fail . show)
-  [|| TDFA.patternToRegex regex compOption execOption ||]
+  examineCode [|| TDFA.patternToRegex regex compOption execOption ||]
 
 fmapL :: (a -> a') -> Either a b -> Either a' b
 fmapL fn (Left e) = Left (fn e)

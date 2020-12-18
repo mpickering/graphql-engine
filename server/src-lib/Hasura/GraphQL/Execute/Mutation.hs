@@ -115,7 +115,7 @@ convertMutationAction
   -> ActionMutation 'Postgres (UnpreparedValue 'Postgres)
   -> m (tx EncJSON, HTTP.ResponseHeaders)
 convertMutationAction env logger userInfo manager reqHeaders = \case
-  AMSync s  -> (_aerTransaction &&& _aerHeaders) <$>
+  AMSync s  -> ((\x -> _aerTransaction x) &&& _aerHeaders) <$>
     resolveActionExecution env logger userInfo s actionExecContext
   AMAsync s -> noResponseHeaders <$> resolveActionMutationAsync s reqHeaders userSession
   where

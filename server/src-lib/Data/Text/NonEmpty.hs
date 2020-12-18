@@ -14,7 +14,7 @@ import qualified Test.QuickCheck            as QC
 
 import           Data.Aeson
 import           Data.Text.Extended
-import           Language.Haskell.TH.Syntax (Lift, Q, TExp)
+import           Language.Haskell.TH.Syntax (Lift, Q, Code, examineCode, liftCode)
 
 
 newtype NonEmptyText = NonEmptyText { unNonEmptyText :: Text }
@@ -35,8 +35,8 @@ parseNonEmptyText text = case mkNonEmptyText text of
   Nothing     -> fail "empty string not allowed"
   Just neText -> return neText
 
-nonEmptyText :: Text -> Q (TExp NonEmptyText)
-nonEmptyText = parseNonEmptyText >=> \text -> [|| text ||]
+nonEmptyText :: Text -> Code Q NonEmptyText
+nonEmptyText = liftCode . (parseNonEmptyText >=> \text -> examineCode [|| text ||])
 
 instance FromJSON NonEmptyText where
   parseJSON = withText "String" parseNonEmptyText

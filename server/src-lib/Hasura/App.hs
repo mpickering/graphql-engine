@@ -13,6 +13,7 @@ import           Control.Monad.Stateless
 import           Control.Monad.STM                         (atomically)
 import           Control.Monad.Trans.Control               (MonadBaseControl (..))
 import           Control.Monad.Unique
+import Control.Monad.IO.Unlift
 import           Data.Aeson                                ((.=))
 import           Data.Time.Clock                           (UTCTime)
 #ifndef PROFILING
@@ -196,7 +197,7 @@ newtype PGMetadataStorageApp a
   deriving ( Functor, Applicative, Monad
            , MonadIO, MonadBase IO, MonadBaseControl IO
            , MonadCatch, MonadThrow, MonadMask
-           , MonadUnique, MonadReader Q.PGPool
+           , MonadUnique, MonadReader Q.PGPool, MonadUnliftIO
            ) via (ReaderT Q.PGPool IO)
 
 -- | Initializes or migrates the catalog and returns the context required to start the server.
@@ -295,6 +296,7 @@ flushLogger = liftIO . FL.flushLogStr . _lcLoggerSet
 runHGEServer
   :: ( HasVersion
      , MonadIO m
+     , MonadUnliftIO m
      , MonadMask m
      , MonadStateless IO m
      , LA.Forall (LA.Pure m)
@@ -681,7 +683,7 @@ instance MonadQueryLog PGMetadataStorageApp where
     unLogger logger $ QueryLog query genSqlM reqId
 
 instance WS.MonadWSLog PGMetadataStorageApp where
-  logWSLog = unLogger
+  logWSLog x = unLogger x
 
 runInSeparateTx :: Q.TxE QErr a -> MetadataStorageT PGMetadataStorageApp a
 runInSeparateTx tx = do

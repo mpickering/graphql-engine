@@ -355,7 +355,7 @@ updateOperators table updatePermissions = do
     , updateOperator tableGQLName $$(G.litName "_inc")
         columnParser IR.UpdInc numericCols
         "increments the numeric columns with given value of the filtered values"
-        (G.Description $"input type for incrementing numeric columns in table " <>> table)
+        (G.Description $ "input type for incrementing numeric columns in table " <>> table)
 
     , let desc = "prepend existing jsonb value of filtered columns with new jsonb value"
       in updateOperator tableGQLName $$(G.litName "_prepend")

@@ -46,10 +46,10 @@ instance ToJSON Version where
 instance FromJSON Version where
   parseJSON = fmap fromText . parseJSON
 
-getVersionFromEnvironment :: TH.Q (TH.TExp Version)
-getVersionFromEnvironment = do
+getVersionFromEnvironment :: TH.Code TH.Q Version
+getVersionFromEnvironment =
   let txt = getValFromEnvOrScript "VERSION" "../scripts/get-version.sh"
-  [|| fromText $ T.dropWhileEnd (== '\n') $ T.pack $$(txt) ||]
+  in [|| fromText $ T.dropWhileEnd (== '\n') $ T.pack $$(txt) ||]
 
 -- | Lots of random things need access to the current version. It would be very convenient to define
 -- @version :: 'Version'@ in this module and export it, and indeed, that’s what we used to do! But
