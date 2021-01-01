@@ -57,13 +57,13 @@ allow-newer: all
 source-repository-package
   type: git
   location: https://gitlab.haskell.org/ghc/ghc-debug.git
-  tag: 9e986501662b8e5941c667214c9380171ba3fb52
+  tag: 9b07c21014e5e5f58b916ac10ced849cd0a13822
   subdir: common
 
 source-repository-package
   type: git
   location: https://gitlab.haskell.org/ghc/ghc-debug.git
-  tag: 9e986501662b8e5941c667214c9380171ba3fb52
+  tag: 9b07c21014e5e5f58b916ac10ced849cd0a13822
   subdir: stub
 
 source-repository-package
