@@ -27,6 +27,7 @@ import qualified Hasura.Tracing             as Tracing
 import qualified System.Exit                as Sys
 import qualified System.Metrics             as EKG
 import qualified System.Posix.Signals       as Signals
+import GHC.Debug.Stub
 
 
 main :: IO ()
@@ -41,7 +42,7 @@ main = do
       Right r -> return r
 
 runApp :: Env.Environment -> HGEOptions Hasura -> IO ()
-runApp env (HGEOptionsG rci hgeCmd) = do
+runApp env (HGEOptionsG rci hgeCmd) = withGhcDebug $ do
   initTime <- liftIO getCurrentTime
   globalCtx@GlobalCtx{..} <- initGlobalCtx rci
 

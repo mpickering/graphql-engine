@@ -12,12 +12,17 @@
 --     $ cabal new-build --project-file=cabal.project.myconfig
 --
 -- See: https://www.haskell.org/cabal/users-guide/nix-local-build.html#configuring-builds-with-cabal-project
-packages: .
+packages: ., patches/**/*.cabal
+
+--/home/matt/ghc-debug/stub/*.cabal
+--/home/matt/ghc-debug/common/*.cabal
+
+index-state: 2020-12-29T12:00:00Z
 
 constraints:
   -- ensure we don't end up with a freeze file that forces an incompatible
   -- version in CI for Setup.hs scripts.
-  setup.Cabal <3.4
+  setup.Cabal <3.6
 
 allow-newer:
   -- dependent-map depends on constraints-extras, but its bounds have not yet
@@ -29,16 +34,37 @@ allow-newer:
 package *
   optimization: 2
   -- For tooling, e.g. 'weeder', and IDE-like stuff:
-  ghc-options: -fwrite-ide-info
+  ghc-options: -fwrite-ide-info -finfo-table-map -fdistinct-constructor-tables
 
   haddock-html: true
   haddock-hoogle: true
   haddock-hyperlink-source: true
   haddock-quickjump: true
 
+package vault
+  documentation: false
+  haddock-html: false
+  haddock-hoogle: false
+  haddock-hyperlink-source: false
+  haddock-quickjump: false
+
 package graphql-engine
   ghc-options: -j
   haddock-options: "--show-all"
+
+allow-newer: all
+
+source-repository-package
+  type: git
+  location: https://gitlab.haskell.org/ghc/ghc-debug.git
+  tag: 9e986501662b8e5941c667214c9380171ba3fb52
+  subdir: common
+
+source-repository-package
+  type: git
+  location: https://gitlab.haskell.org/ghc/ghc-debug.git
+  tag: 9e986501662b8e5941c667214c9380171ba3fb52
+  subdir: stub
 
 source-repository-package
   type: git
@@ -52,13 +78,18 @@ source-repository-package
 
 source-repository-package
   type: git
-  location: https://github.com/hasura/ci-info-hs.git
-  tag: 947fd56582b1e8bec9ffed98ca9ac2f6b63e36c9
+  location: https://github.com/mpickering/ci-info-hs.git
+  tag: eee4be901c28406b393eb4648d30a6d9adbf56ef
 
 source-repository-package
   type: git
   location: https://github.com/hasura/pool.git
   tag: 0fdfaed4e109ca6a6bf00ed6d79c329626e3bdd4
+
+source-repository-package
+  type: git
+  location: https://github.com/AndreasPK/dom-lt.git
+  tag: 90cb66a5eba7c1b24322d94c692698a7212b42fe
 
 repository head.hackage.ghc.haskell.org
    url: https://ghc.gitlab.haskell.org/head.hackage/

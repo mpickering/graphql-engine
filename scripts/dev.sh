@@ -13,6 +13,7 @@ shopt -s globstar
 # This makes use of 'cabal.project.dev-sh*' files when building. See
 # 'cabal.project.dev-sh.local'.
 
+GHC=/home/matt/ghc-debug-ghc/_build/stage1/bin/ghc
 
 echo_pretty() {
     echo ">>> $(tput setaf 2)$1$(tput sgr0)"
@@ -224,8 +225,8 @@ if [ "$MODE" = "graphql-engine" ]; then
   echo_pretty "    $ $0 postgres"
   echo_pretty ""
 
-  RUN_INVOCATION=(cabal new-run --project-file=cabal.project.dev-sh --RTS --
-    exe:graphql-engine +RTS -N -T -s -RTS serve
+  RUN_INVOCATION=(cabal new-run -w $GHC --project-file=cabal.project.dev-sh --RTS --
+    exe:graphql-engine +RTS -N -T -s -hT -l-au -i0.5 -RTS serve
     --enable-console --console-assets-dir "$PROJECT_ROOT/console/static/dist"
     )
 
@@ -234,7 +235,7 @@ if [ "$MODE" = "graphql-engine" ]; then
   echo_pretty "    $ ${RUN_INVOCATION[*]}"
   echo_pretty ''
 
-  cabal new-build --project-file=cabal.project.dev-sh exe:graphql-engine
+  cabal new-build -w $GHC --project-file=cabal.project.dev-sh exe:graphql-engine
   wait_postgres
 
   # Print helpful info after startup logs so it's visible:
@@ -403,7 +404,7 @@ elif [ "$MODE" = "test" ]; then
     GRAPHQL_ENGINE_TEST_LOG=/tmp/hasura-dev-test-engine.log
     echo_pretty "Starting graphql-engine, logging to $GRAPHQL_ENGINE_TEST_LOG"
     export HASURA_GRAPHQL_SERVER_PORT=8088
-    cabal new-run --project-file=cabal.project.dev-sh -- exe:graphql-engine --database-url="$CONTAINER_DB_URL" serve --stringify-numeric-types \
+    cabal new-run -w $GHC --project-file=cabal.project.dev-sh -- exe:graphql-engine --database-url="$CONTAINER_DB_URL" serve --stringify-numeric-types \
       --enable-console --console-assets-dir ../console/static/dist \
       &> "$GRAPHQL_ENGINE_TEST_LOG" & GRAPHQL_ENGINE_PID=$!
 

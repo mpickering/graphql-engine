@@ -28,7 +28,8 @@ flag profiling
 common common-all
   ghc-options:
     -fmax-simplifier-iterations=20 -foptimal-applicative-do
-    -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
+    -Wall -Wcompat -Wincomplete-uni-patterns -Wredundant-constraints
+    -eventlog
 
   if flag(developer)
     cpp-options: -DDeveloperAPIs
@@ -275,6 +276,7 @@ library
                      -- scheduled triggers
                      , cron >= 0.6.2
                      , unliftio-core
+                     , ghc-debug-stub
   if !flag(profiling)
     build-depends:
       -- 0.6.1 is supposedly not okay for ghc 8.6:
@@ -506,6 +508,7 @@ executable graphql-engine
                    , time
                    , unix
                    , ekg-core
+                   , ghc-debug-stub
 
 test-suite graphql-engine-tests
   import: common-all, common-exe
